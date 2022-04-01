@@ -1,14 +1,14 @@
 /**
  * Upload form of ptwikipdia
  *
- * @author [[pt:User:Danilo.mac]]
- * @author [[pt:User:Herder.wiki]]
- * @author [[pt:User:!Silent]]
- * @date 14/apr/2010
- * @updated 28/aug/2016
+ * @author: [[pt:User:Danilo.mac]]
+ * @author: Helder (https://github.com/he7d3r)
+ * @author: [[pt:User:!Silent]]
+ * @date: 14/abr/2010
+ * @updated: 26/fev/2014
  */
 /* jshint laxbreak: true, evil: true */
-/* global mediaWiki, jQuery, wikEd */
+/* global mediaWiki, jQuery */
 
 ( function ( mw, $ ) {
 'use strict';
@@ -22,15 +22,7 @@ var uf = {};
 /**
  * The fields of form
  *
- * @property {Array}
-	desc: string,
-	tip: string,
-	rows: number,
-	cols: number,
-	defaulText: string,
-	list: array,
-	optional: boolean,
-	condition: boolean
+ * @property: {desc: string, tip: string[, rows: number[, cols: number[, defaulText: string[, list: array[, optional: boolean[, condition: boolean]]]]]]}
  */
 uf.fields = [ {
 		rows: 3,
@@ -54,8 +46,8 @@ uf.fields = [ {
 		tip: 'Quem é o detentor dos direitos de autor?'
 	}, {
 		cols: 50,
-		desc: 'Artigo/anexo',
-		tip: 'Para qual artigo ou anexo da Wikipédia essa imagem é necessária?'
+		desc: 'Artigo',
+		tip: 'Para qual artigo da Wikipédia essa imagem é necessária?'
 	}, {
 		cols: 50,
 		desc: 'Integral ou parte',
@@ -83,7 +75,7 @@ uf.fields = [ {
 		rows: 2,
 		cols: 60,
 		desc: 'Propósito',
-		tip: 'Qual é a importância para o artigo/anexo?',
+		tip: 'Qual é a importância para o artigo?',
 		defaultText: 'Prover informação visual indispensável para a compreensão do artigo.'
 	}, {
 		rows: 2,
@@ -128,13 +120,6 @@ uf.setupForm = function () {
 	$( '.mw-htmlform-field-Licenses' ).remove();
 	$( '#editpage-specialchars' ).parent().parent().parent().remove();
 
-	// wikEd compatibility
-	if ( typeof wikEd !== 'undefined' ) {
-		if ( wikEd.useWikEd ) {
-			$( '#wikEdInputWrapper' ).remove();
-		}
-	}
-
 	$( '<input />', {
 		'type': 'hidden',
 		'name': 'wpUploadDescription',
@@ -151,7 +136,7 @@ uf.setupForm = function () {
 			if ( doSubmit && oldSubmit ) {
 				if ( typeof oldSubmit === 'string') {
 					doSubmit = eval( oldSubmit );
-				} else if ( $.isFunction( oldSubmit ) ) {
+				} else if ( typeof oldSubmit === 'function' ) {
 					doSubmit = oldSubmit.apply( $loading[ 0 ], arguments );
 				}
 			}
@@ -170,21 +155,21 @@ uf.setupForm = function () {
 		}
 
 		if ( currentField.list ) {
-			$( '<tr />' ).append(
-				$( '<td class="mw-label" />' ).append(
-					$( '<label class="uf-label" for="uf-field-' + i + '" />' )
+			$( '<tr></tr>' ).append(
+				$( '<td class="mw-label"></td>' ).append(
+					$( '<label class="uf-label" for="uf-field-' + i + '"></label>' )
 						.html( currentField.desc + ': ' )
 				),
-				$( '<td class="mw-input" />' ).append(
-					$( '<select class="uf-field" id="uf-field-' + i + '" />' )
-						.append( $( '<option />' ) )
+				$( '<td class="mw-input"></td>' ).append(
+					$( '<select class="uf-field" id="uf-field-' + i + '"></select>' )
+						.append( $( '<option></option>' ) )
 				)
 			).appendTo( $table );
 
 			for ( j = 0; j < currentField.list[ 1 ].length; j++ ) {
 				listValues = currentField.list[ 1 ][ j ].split( currentField.list[ 0 ] );
 
-				$( '<option />' )
+				$( '<option></option>' )
 					.val( listValues[ 0 ] )
 					.html( currentField.list[ 0 ] === ' - '
 						? currentField.list[ 1 ][ j ]
@@ -194,13 +179,13 @@ uf.setupForm = function () {
 		} else {
 			tagName = ( !currentField.rows || currentField.rows === 1 ) ? 'input' : 'textarea';
 
-			$( '<tr />' ).append(
-				$( '<td class="mw-label" />' ).append(
-					$( '<label class="uf-label" for="uf-field-' + i + '" />' )
+			$( '<tr></tr>' ).append(
+				$( '<td class="mw-label"></td>' ).append(
+					$( '<label class="uf-label" for="uf-field-' + i + '"></label>' )
 						.html( currentField.desc + ': ' )
 				),
-				$( '<td class="mw-input" />' ).append(
-					$( '<' + tagName + ' />' )
+				$( '<td class="mw-input"></td>' ).append(
+					$( '<' + tagName + '></' + tagName + '>' )
 						.css( 'width', 'auto' )
 						.attr( {
 							'class': 'uf-field',
@@ -217,10 +202,9 @@ uf.setupForm = function () {
 
 		if ( currentField.tip ) {
 			$( '#uf-field-' + i ).parent().append(
-				$( '<span />' ).css( {
+				$( '<div></div>' ).css( {
 					'font-size': 'smaller',
-					'minHeight': '25px'/*,
-					'text': currentField.tip*/
+					'minHeight': '25px'
 				} )
 			);
 		}
@@ -228,11 +212,11 @@ uf.setupForm = function () {
 };
 
 /**
- * Collect the image information e append in input#wpUploadDescription
+ * Collect the image information e append in inpu#wpUploadDescription
  */
 uf.upload = function () {
 	var $this,
-		text = '{{Informação\n';
+		text = '{' + '{Informação\n';
 
 	$( '.uf-field' ).each( function ( i ) {
 		$this = $( this );
@@ -259,7 +243,7 @@ uf.upload = function () {
 		return false;
 	}
 
-	text += '}}\n';
+	text += '}' + '}\n';
 
 	$( '#wpUploadDescription' ).val( text );
 
@@ -272,4 +256,4 @@ if ( mw.config.get( 'wgCanonicalSpecialPageName' ) === 'Upload'
 	$( uf.setupForm );
 }
 
-}() );
+}( mediaWiki, jQuery ) );
